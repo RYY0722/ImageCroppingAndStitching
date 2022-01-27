@@ -22,11 +22,7 @@ class StitchAndCal(object):
         width = patch_width
         img_size = target_size
         stride = (img_size - width) // (per-1)
-        # input_list = sorted([os.path.join(path, 'train/input', name) for name in
-        #                           os.listdir(os.path.join(path, 'train/input'))])
-        input_list = [item for item in path.glob("*.png")]
-        input_list_bak = input_list
-        # input_list = [input_list[i] for i in range(len(input_list)) if i % 3 == 2]
+        input_list_bak = sorted([item for item in path.glob("*.png")])
         for ind in range(3):
             input_list = [input_list_bak[i] for i in range(len(input_list_bak)) if i % 3 == ind]
             for i in range(len(input_list)//per**2):

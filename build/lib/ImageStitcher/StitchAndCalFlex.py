@@ -25,14 +25,9 @@ class StitchAndCalFlex(object):
         width = patch_width
         img_size = target_size
         stride = (img_size - width) // (per-1)
-        # input_list = sorted([os.path.join(path, 'train/input', name) for name in
-        #                           os.listdir(os.path.join(path, 'train/input'))])
-        input_list = [item for item in path.glob("*.png")]
-        input_list_bak = input_list
-        # input_list = [input_list[i] for i in range(len(input_list)) if i % 3 == 2]
+
         for cat in cats:
             input_list = sorted([file for file in path.glob("*%s.png"%(cat))])
-            # input_list = [input_list_bak[i] for i in range(len(input_list_bak)) if i % num_cat == ind]
             for i in range(len(input_list)//per**2):
                 sub_lst = input_list[i*per**2:(i+1)*per**2]
                 img = np.zeros((img_size,img_size))

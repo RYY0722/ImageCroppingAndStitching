@@ -24,6 +24,7 @@ class StitchAndCalFlex(object):
         per = per
         width = patch_width
         img_size = target_size
+        stride = (target_size - width) // (per - 1)
         for cat in cats:
             input_list = sorted([file for file in path.glob("*%s.png"%(cat))])
             for i in range(len(input_list)//per**2):

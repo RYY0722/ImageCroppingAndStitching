@@ -10,67 +10,62 @@ from skimage.metrics import structural_similarity as ssim
 import shutil
 import json
 import matplotlib.pyplot as plt
-class StitchAndCalJson(object):
-    def __init__(self):
-        return
-    def stich(self, path, meta):
+from . import StitchAndCalFlex
+
+class StitchAndCalJson(StitchAndCalFlex):
+
+    def stich(self, path, meta, cats):
         with open(path / meta) as json_file:
             data = json.load(json_file)
         # path = self.cp.run(path)
+        try:
+            data = data['test']
+        except:
+            pass
         path = Path(path)
         if (path / 'comb').exists():
             shutil.rmtree(path / 'comb')
         (path / 'comb').mkdir(exist_ok=False)
-        i = 0
-        files = [file for file in path.glob('*_sr.png')]
-        for ID, lsts in data.items():
-            totalX, totalY = lsts[-1][1], lsts[-1][3]
-            res = np.zeros((totalX, totalY))
-            cnt_map = np.zeros((totalX, totalY))
-            for lst in lsts:
-                x1, x2, y1, y2 = lst
-                # name = "{}_{}_{}_sr.png".format(ID, x1, y1)
-                img = cv2.imread(str(path / files[i]),cv2.IMREAD_GRAYSCALE)
-                i += 1
-                try:
-                    res[x1:x2, y1:y2] += img
-                    cnt_map[x1:x2, y1:y2] += 1
-                    # print(lst, 'ok')
-                except:
-                    print(lst, 'not ok')  
-            img = Image.fromarray((res/cnt_map).astype(np.uint8))
-            img.save(path / 'comb' / (ID+"_sr.png"))
+        for cat in cats:
+            files = sorted([file for file in path.glob('*_{}.png'.format(cat))])
+            i=0
+            for ID, lsts in data.items():
+                totalX, totalY = lsts[-1][1], lsts[-1][3]
+                res = np.zeros((totalX, totalY))
+                cnt_map = np.zeros((totalX, totalY))
+                # hr = cv2.imread(r'D:\Exercise\Python\datasets\STDR\eehpc\harnet\imgs\{}_hr.png'.format(ID))
+                for lst in lsts:
+                    x1, x2, y1, y2 = lst
+                    # name = "{}_{}_{}_sr.png".format(ID, x1, y1)
+                    img = cv2.imread(str(path / files[i]),cv2.IMREAD_GRAYSCALE)
+                    i+=1
+                    try:
+    
+                        res[x1:x2, y1:y2] += img
+                        # hr_patch = hr[x1:x2, y1:y2]
+                        cnt_map[x1:x2, y1:y2] += 1
+                        # fig = plt.figure(figsize=(1,2))
+                        # fig.add_subplot(1,2,1)
+                        # plt.imshow(img)
+                        # fig.add_subplot(1,2,2)
+                        # plt.imshow(hr_patch)   
+                        # print(lst, 'ok')
+                    except:
+                        print(lst, 'not ok')  
+                img = Image.fromarray((res/cnt_map).astype(np.uint8))
+                img.save(path / 'comb' / (ID+"_{}.png".format(cat)))
         
         return
-    def cal(self, path):
-        psnr_sum = 0
-        ssim_sum = 0
-        cnt = 0
-        hrs = sorted(glob.glob(os.path.join(path, '*_hr.png')))
-        srs = sorted(glob.glob(os.path.join(path, '*_sr.png')))
-        # assert len(hrs) == len(lrs), 'hr != lr'
-        assert len(hrs) == len(srs), 'hr != sr'
-        for i in range(len(hrs)):
-            hr = cv2.imread(hrs[i],cv2.IMREAD_GRAYSCALE)
-            # lr = cv2.imread(lrs[i], cv2.IMREAD_GRAYSCALE)
-            sr = cv2.imread(srs[i],cv2.IMREAD_GRAYSCALE)
-            _psnr = psnr(hr, sr)
-            _ssim = ssim(hr, sr)
-            psnr_sum += _psnr
-            ssim_sum += _ssim
-            cnt += 1
-        return {'psnr':psnr_sum/cnt,'ssim':ssim_sum/cnt}
-            
-            
-        return 
-    def stichAndCal(self, path, per, patch_width, target_size):
-        self.stich(path, per, patch_width, target_size)
-        return self.cal(os.path.join(path, 'comb'))
+   
+    def stichAndCal(self, path, meta, cats):
+        self.stich(path, meta, cats)
+        return self.cal(path / 'comb')
 if __name__ == '__main__':
     sac = StitchAndCalJson()
-    path = Path(r'D:\Exercise\Python\datasets\six\paired\whole-v2\whole-sr\save_results')
-    meta_path = Path(r'D:\Exercise\Python\datasets\six\paired\whole-v2\processed\meta.txt')
-    data = sac.stich(path, meta_path)
+    path = Path(r'D:\Exercise\Python\0models\MultiTask\v2\mul-02-0.3\eval-outer\save_results')
+    meta_path = Path(r'D:\Exercise\Python\datasets\six\paired\parts\meta-160s65.txt')
+    data = sac.stichAndCal(path, meta_path, ['hr','lr','sr'])
+    # data = sac.stich(path, meta_path)
     # data = sac.cal(path)
     print(data)
         

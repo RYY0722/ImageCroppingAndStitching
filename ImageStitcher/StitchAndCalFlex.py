@@ -10,10 +10,11 @@ import shutil
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 import shutil
+import pandas as pd
 class StitchAndCalFlex(object):
     def __init__(self):
         return
-    def stich(self, path, per, patch_width, target_size, cats=[]):
+    def stitch(self, path, per, patch_width, target_size, cats=[]):
         num_cat = len(cats)
         # path = self.cp.run(path)
         path = Path(path)
@@ -29,8 +30,9 @@ class StitchAndCalFlex(object):
         input_list = [item for item in path.glob("*.png")]
         input_list_bak = input_list
         # input_list = [input_list[i] for i in range(len(input_list)) if i % 3 == 2]
-        for ind in range(num_cat):
-            input_list = [input_list_bak[i] for i in range(len(input_list_bak)) if i % num_cat == ind]
+        for cat in cats:
+            input_list = sorted([file for file in path.glob("*%s.png"%(cat))])
+            # input_list = [input_list_bak[i] for i in range(len(input_list_bak)) if i % num_cat == ind]
             for i in range(len(input_list)//per**2):
                 sub_lst = input_list[i*per**2:(i+1)*per**2]
                 img = np.zeros((img_size,img_size))
@@ -62,7 +64,6 @@ class StitchAndCalFlex(object):
                 img = Image.fromarray((img/cnt_map).astype(np.uint8))
                 # img = img.astype(np.uint8)
                 
-                cat = cats[ind]
                 img.save(path / 'comb' / (str(i).zfill(3)+"_{}.png".format(cat)))
 
         return
@@ -70,8 +71,14 @@ class StitchAndCalFlex(object):
         psnr_sum = 0
         ssim_sum = 0
         cnt = 0
+        model_psnr = []
+        model_ssim = []
         hrs = sorted(glob.glob(os.path.join(path, '*_hr.png')))
+        # hrs = [os.path.join(path, file) for file in hrs]
+        # lrs = sorted(glob.glob(os.path.join(path, '*_lr.png')))
+        # lrs = [os.path.join(path, file) for file in lrs]
         srs = sorted(glob.glob(os.path.join(path, '*_sr.png')))
+        # srs = [os.path.join(path, file) for file in srs]
         # assert len(hrs) == len(lrs), 'hr != lr'
         assert len(hrs) == len(srs), 'hr != sr'
         for i in range(len(hrs)):
@@ -82,13 +89,14 @@ class StitchAndCalFlex(object):
             _ssim = ssim(hr, sr)
             psnr_sum += _psnr
             ssim_sum += _ssim
+            model_psnr.append(_psnr)
+            model_ssim.append(_ssim)
             cnt += 1
+            pd.DataFrame(data={'ssim':model_ssim, 'psnr':model_psnr}).to_csv(Path(path).parent / 'res.csv')
         return {'psnr':psnr_sum/cnt,'ssim':ssim_sum/cnt}
-            
-            
-        return 
-    def stichAndCal(self, path, per, patch_width, target_size):
-        self.stich(path, per, patch_width, target_size)
+
+    def stitchAndCal(self, path, per, patch_width, target_size, cats=[]):
+        self.stitch(path, per, patch_width, target_size, cats=cats)
         return self.cal(os.path.join(path, 'comb'))
 if __name__ == '__main__':
     sac = StitchAndCalFlex()

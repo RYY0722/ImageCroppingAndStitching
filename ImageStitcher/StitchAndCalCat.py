@@ -10,7 +10,8 @@ import shutil
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 import shutil
-class StitchAndCalCat(object):
+from . import StitchAndCalFlex
+class StitchAndCalCat(StitchAndCalFlex):
     def __init__(self):
         return
     def stich(self, path, per, patch_width, target_size, cats=[]):
@@ -62,29 +63,10 @@ class StitchAndCalCat(object):
                 # img = Image.fromarray((img/cnt_map).astype(np.uint8)).tobitmap()
                 img = Image.fromarray((img/cnt_map).astype(np.uint8))
                 # img = img.astype(np.uint8)
-                img.save(path / 'comb' / (str(i).zfill(3)+"_{}.png".format(cat)))
+                img.save(path / 'comb' / (str(i).zfill(4)+"_{}.png".format(cat)))
 
         return
-    def cal(self, path):
-        psnr_sum = 0
-        ssim_sum = 0
-        cnt = 0
-        hrs = sorted(glob.glob(os.path.join(path, '*_hr.png')))
-        srs = sorted(glob.glob(os.path.join(path, '*_sr.png')))
-        # assert len(hrs) == len(lrs), 'hr != lr'
-        assert len(hrs) == len(srs), 'hr != sr'
-        for i in range(len(hrs)):
-            hr = cv2.imread(hrs[i],cv2.IMREAD_GRAYSCALE)
-            # lr = cv2.imread(lrs[i], cv2.IMREAD_GRAYSCALE)
-            sr = cv2.imread(srs[i],cv2.IMREAD_GRAYSCALE)
-            _psnr = psnr(hr, sr)
-            _ssim = ssim(hr, sr)
-            psnr_sum += _psnr
-            ssim_sum += _ssim
-            cnt += 1
-        return {'psnr':psnr_sum/cnt,'ssim':ssim_sum/cnt}
-            
-        
+
     def stichAndCal(self, path, per, patch_width, target_size, cats=[]):
         self.stich(path, per, patch_width, target_size, cats)
         return self.cal(os.path.join(path, 'comb'))     

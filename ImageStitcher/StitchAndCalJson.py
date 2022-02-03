@@ -13,7 +13,8 @@ import matplotlib.pyplot as plt
 from . import StitchAndCalFlex
 
 class StitchAndCalJson(StitchAndCalFlex):
-
+    def __init__(self):
+        super(StitchAndCalJson, self).__init__()
     def stich(self, path, meta, cats):
         with open(path / meta) as json_file:
             data = json.load(json_file)

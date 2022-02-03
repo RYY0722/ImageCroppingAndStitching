@@ -15,8 +15,10 @@ from . import StitchAndCalFlex
 class StitchAndCalJson(StitchAndCalFlex):
     def __init__(self):
         super(StitchAndCalJson, self).__init__()
-    def stich(self, path, meta, cats):
-        with open(path / meta) as json_file:
+    def stitch(self, path, meta, cats):
+        # print('path: ',path)
+        # print('meta: ',meta)
+        with open(meta) as json_file:
             data = json.load(json_file)
         # path = self.cp.run(path)
         try:
@@ -24,11 +26,15 @@ class StitchAndCalJson(StitchAndCalFlex):
         except:
             pass
         path = Path(path)
+        # print('path: ',path)
         if (path / 'comb').exists():
             shutil.rmtree(path / 'comb')
         (path / 'comb').mkdir(exist_ok=False)
         for cat in cats:
+            # print('path: ',path)
+        
             files = sorted([file for file in path.glob('*_{}.png'.format(cat))])
+            # print('file: ',files[0])
             i=0
             for ID, lsts in data.items():
                 totalX, totalY = lsts[-1][1], lsts[-1][3]
@@ -38,7 +44,7 @@ class StitchAndCalJson(StitchAndCalFlex):
                 for lst in lsts:
                     x1, x2, y1, y2 = lst
                     # name = "{}_{}_{}_sr.png".format(ID, x1, y1)
-                    img = cv2.imread(str(path / files[i]),cv2.IMREAD_GRAYSCALE)
+                    img = cv2.imread(str(files[i]),cv2.IMREAD_GRAYSCALE)
                     i+=1
                     try:
     
@@ -52,14 +58,16 @@ class StitchAndCalJson(StitchAndCalFlex):
                         # plt.imshow(hr_patch)   
                         # print(lst, 'ok')
                     except:
+                        # print(img.shape)
                         print(lst, 'not ok')  
+                        return
                 img = Image.fromarray((res/cnt_map).astype(np.uint8))
                 img.save(path / 'comb' / (ID+"_{}.png".format(cat)))
         
         return
    
-    def stichAndCal(self, path, meta, cats):
-        self.stich(path, meta, cats)
+    def stitchAndCal(self, path, meta, cats):
+        self.stitch(path, meta, cats)
         return self.cal(path / 'comb')
 if __name__ == '__main__':
     sac = StitchAndCalJson()

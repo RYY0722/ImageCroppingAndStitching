@@ -1,0 +1,11 @@
+README.md
+setup.py
+ImageStitcher/StitchAndCal.py
+ImageStitcher/StitchAndCalCat.py
+ImageStitcher/StitchAndCalFlex.py
+ImageStitcher/StitchAndCalJson.py
+ImageStitcher/__init__.py
+ImageStitcher.egg-info/PKG-INFO
+ImageStitcher.egg-info/SOURCES.txt
+ImageStitcher.egg-info/dependency_links.txt
+ImageStitcher.egg-info/top_level.txt

@@ -58,7 +58,7 @@ class StitchAndCalJson(StitchAndCalFlex):
                         # plt.imshow(hr_patch)   
                         # print(lst, 'ok')
                     except:
-                        # print(img.shape)
+                        print(img.shape)
                         print(lst, 'not ok')  
                         return
                 img = Image.fromarray((res/cnt_map).astype(np.uint8))

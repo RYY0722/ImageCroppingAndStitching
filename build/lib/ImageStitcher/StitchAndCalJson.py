@@ -31,10 +31,10 @@ class StitchAndCalJson(StitchAndCalFlex):
             shutil.rmtree(path / 'comb')
         (path / 'comb').mkdir(exist_ok=False)
         for cat in cats:
-            print('path: ',path)
+            # print('path: ',path)
         
             files = sorted([file for file in path.glob('*_{}.png'.format(cat))])
-            print('file: ',files[0])
+            # print('file: ',files[0])
             i=0
             for ID, lsts in data.items():
                 totalX, totalY = lsts[-1][1], lsts[-1][3]
@@ -58,7 +58,7 @@ class StitchAndCalJson(StitchAndCalFlex):
                         # plt.imshow(hr_patch)   
                         # print(lst, 'ok')
                     except:
-                        # print(img.shape)
+                        print(img.shape)
                         print(lst, 'not ok')  
                         return
                 img = Image.fromarray((res/cnt_map).astype(np.uint8))
